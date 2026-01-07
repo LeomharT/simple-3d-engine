@@ -22,6 +22,8 @@ const size = {
   height: window.innerHeight,
   pixelRatio: Math.min(2, window.devicePixelRatio),
 };
+const aspect = size.width / size.height;
+
 const canvas = document.createElement("canvas");
 canvas.style.width = size.width + "px";
 canvas.style.height = size.height + "px";
@@ -49,6 +51,17 @@ function point(coord: Vector2) {
   ctx.restore();
 }
 
+function line(from: Vector2, to: Vector2) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#d4380d";
+  ctx.moveTo(from.x, from.y);
+  ctx.lineTo(to.x, to.y);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function screen(p: Vector2) {
   const x = ((p.x + 1.0) / 2.0) * size.width;
   const y = -((p.y - 1.0) / 2.0) * size.height;
@@ -65,20 +78,78 @@ function project(p: Vector3) {
   };
 }
 
+function rotate(p: Vector3, angle: number) {
+  const c = Math.cos(angle);
+  const s = Math.sin(angle);
+
+  const x = p.x * c - p.z * s;
+  const z = p.x * s + p.z * c;
+
+  return {
+    x,
+    y: p.y,
+    z,
+  };
+}
+
 let prevTime = 0;
-let dz = 0;
+let dz = 1;
+let angle = 0;
+
+const vs = [
+  { x: 0.5 / 2.0, y: 0.5 / 2.0, z: 0.5 / 2.0 },
+  { x: -0.5 / 2.0, y: 0.5 / 2.0, z: 0.5 / 2.0 },
+  { x: -0.5 / 2.0, y: -0.5 / 2.0, z: 0.5 / 2.0 },
+  { x: 0.5 / 2.0, y: -0.5 / 2.0, z: 0.5 / 2.0 },
+
+  { x: 0.5 / 2.0, y: 0.5 / 2.0, z: -0.5 / 2.0 },
+  { x: -0.5 / 2.0, y: 0.5 / 2.0, z: -0.5 / 2.0 },
+  { x: -0.5 / 2.0, y: -0.5 / 2.0, z: -0.5 / 2.0 },
+  { x: 0.5 / 2.0, y: -0.5 / 2.0, z: -0.5 / 2.0 },
+];
+
+const fs = [
+  [0, 1, 2, 3],
+  [4, 5, 6, 7],
+  [0, 4],
+  [1, 5],
+  [2, 6],
+  [3, 7],
+];
+
+function translateZ(p: Vector3, dz: number) {
+  return {
+    x: p.x,
+    y: p.y * aspect,
+    z: p.z + dz,
+  };
+}
 
 function render(time: number = 0) {
   // Time
   const dt = (time - prevTime) / 1000;
   prevTime = time;
 
-  dz += dt;
+  //   dz += dt;
+  angle += Math.PI * dt;
 
   // World
   clean();
   // Move to 灭点(Vanishing point)
-  point(screen(project({ x: 0.5, y: 0.0, z: 1.0 + dz })));
+  for (const v of vs) {
+    point(screen(project(translateZ(rotate(v, angle), dz))));
+  }
+  for (const f of fs) {
+    for (let i = 0; i < f.length; i++) {
+      const a = vs[f[i]];
+      const b = vs[f[(i + 1) % f.length]];
+
+      line(
+        screen(project(translateZ(rotate(a, angle), dz))),
+        screen(project(translateZ(rotate(b, angle), dz)))
+      );
+    }
+  }
 
   // Animation
   requestAnimationFrame(render);

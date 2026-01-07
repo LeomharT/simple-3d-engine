@@ -1,4 +1,5 @@
 import "./index.css";
+import { fs, vs } from "./penger";
 /**
  * Coordinate
  * (x, y, z)
@@ -96,7 +97,7 @@ let prevTime = 0;
 let dz = 1;
 let angle = 0;
 
-const vs = [
+const _vs = vs ?? [
   { x: 0.5 / 2.0, y: 0.5 / 2.0, z: 0.5 / 2.0 },
   { x: -0.5 / 2.0, y: 0.5 / 2.0, z: 0.5 / 2.0 },
   { x: -0.5 / 2.0, y: -0.5 / 2.0, z: 0.5 / 2.0 },
@@ -108,7 +109,7 @@ const vs = [
   { x: 0.5 / 2.0, y: -0.5 / 2.0, z: -0.5 / 2.0 },
 ];
 
-const fs = [
+const _fs = fs ?? [
   [0, 1, 2, 3],
   [4, 5, 6, 7],
   [0, 4],
@@ -131,13 +132,13 @@ function render(time: number = 0) {
   prevTime = time;
 
   //   dz += dt;
-  angle += Math.PI * dt;
+  angle += Math.PI * dt * 0.22;
 
   // World
   clean();
   // Move to 灭点(Vanishing point)
   for (const v of vs) {
-    point(screen(project(translateZ(rotate(v, angle), dz))));
+    // point(screen(project(translateZ(rotate(v, angle), dz))));
   }
   for (const f of fs) {
     for (let i = 0; i < f.length; i++) {

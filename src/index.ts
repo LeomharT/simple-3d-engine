@@ -44,11 +44,11 @@ function clean() {
   ctx.restore();
 }
 
-function point(coord: Vector2) {
+function point(coord: Vector2, z: number) {
   ctx.save();
   const s = 20;
   ctx.fillStyle = "#FFA0CF";
-  ctx.fillRect(coord.x - s / 2, coord.y - s / 2, s, s);
+  ctx.fillRect(coord.x - s / 2, coord.y - s / 2, s / z, s / z);
   ctx.restore();
 }
 
@@ -94,7 +94,7 @@ function rotate(p: Vector3, angle: number) {
 }
 
 let prevTime = 0;
-let dz = 1;
+let dz = 1.5;
 let angle = 0;
 
 const _vs = vs ?? [
@@ -138,7 +138,7 @@ function render(time: number = 0) {
   clean();
   // Move to 灭点(Vanishing point)
   for (const v of vs) {
-    // point(screen(project(translateZ(rotate(v, angle), dz))));
+    // point(screen(project(translateZ(rotate(v, angle), dz))), dz);
   }
   for (const f of fs) {
     for (let i = 0; i < f.length; i++) {

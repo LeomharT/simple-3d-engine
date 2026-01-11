@@ -157,3 +157,17 @@ function render(time: number = 0) {
 }
 
 render();
+
+function resize() {
+  size.width = window.innerWidth;
+  size.height = window.innerHeight;
+
+  canvas.style.width = size.width + "px";
+  canvas.style.height = size.height + "px";
+  canvas.width = size.width * size.pixelRatio;
+  canvas.height = size.height * size.pixelRatio;
+
+  ctx.scale(size.pixelRatio, size.pixelRatio);
+}
+
+window.addEventListener("resize", resize);
